@@ -19,12 +19,13 @@ import hashlib
 import getpass
 import os
 import textwrap
+import binascii
 
 def gen_passwd(master_passwd, domain_name, username, length):
-    to_hash = master_passwd + domain_name + username + str(length)
-    hashobj = hashlib.sha256(to_hash.encode())
-    hashdig = hashobj.hexdigest()
-    return hashdig[:length]        
+    salt = domain_name + username + str(length)
+    rawpasswd = binascii.hexlify(hashlib.pbkdf2_hmac("sha256", master_passwd.encode(), salt.encode(), 1000000))
+    strpasswd = rawpasswd.decode("utf-8")
+    return strpasswd[:length]        
 
 def main():
     print(textwrap.fill("This program creates secure passwords up to 64 characters long. The passwords contain combinations of letters and numbers. If you forget your password, you can always regenerate it, as long as you use the same master password."))
